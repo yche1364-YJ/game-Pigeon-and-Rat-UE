@@ -76,6 +76,7 @@ Prompts are quoted in the language I typed them in (Mandarin), with an English g
 | 5.4 | 「記得繼續執行…過一次馬路才會多人和多一點車的那個邏輯」 *(remember to keep going on the "more people and cars after each crossing" logic)* | `LaneSpawner.AddCar` adds +1 car in about 60% of lanes, up to +3 per lane. `ApplyTraffic` adds +1 pedestrian per crossing (+2 from the 3rd crossing on), up to 9; on reset `TrimCars` removes the extras and destroys the extra pedestrians. Pedestrians now **step on the rat** (−1 heart). |
 | 5.5 | 「食物都放得太規律了，可以四處放，長椅也是太規律。有些會放在街道的箱子上，有些放在地上，有些放在垃圾桶…不只會有一條斑馬線，左右也增加」 *(food and benches are too regular; scatter them: some on street boxes, some on the ground, some on trash cans; add crosswalks on the left and right too)* | `Tools/level_layout.py`, run through the editor Python console: **9 pickups** on the ground, crates, a crate stack, trash cans and benches; decorative props; crosswalks at x = ±1500, with the lane dashes underneath hidden; pedestrians spread over the 3 crosswalks. |
 | 5.6 | 「總共要有三條命，一開始的第一次過馬路再次變簡單一點」 *(3 lives in total; make the very first crossing easier again)* | Confirmed Lives = 3 (already set in `ResetGame`). The first crossing uses traffic factor 0.5; afterwards it is `min(0.7 + 0.05·n, 1.2)`. |
+| 5.7 | 「我想改成每收集到一個食物就會變多一點車子，循序漸進讓他變 hard…因為之前說要每過一次馬路，但這樣玩家可能不太會過關。所有車在人行道紅燈的時候應該要停下來，但會有很多人經過，所以老鼠要小心。然後鴿子第一次拿到食物出現一次，第二次拿到食物出現兩次，以此類推。你先評估這個可以改嗎，然後會影響前面的工作嗎」 *(I want each food collected to add a few more cars, ramping up gradually; ramping per crossing makes the game hard to clear. When pedestrians have the light, all cars should stop, but lots of people cross, so the rat must be careful. The pigeon should come once after the first pickup, twice after the second, and so on. Evaluate first: is this doable, and does it affect earlier work?)* | **AI evaluation:** feasible; the ramp is a trigger swap, the signal stop is the biggest change, and the pigeon change makes the early game easier. It requires a re-package, a doc update and a new demo; art, models and audio are untouched. **Implemented:** `ApplyTraffic` is now *idempotent* and keyed to `Delivered` (0–5). It is called from `UpdateCarry`. Traffic factor = 0.5 + 0.12 × delivered; `LaneSpawner.SetExtra` gives +0, +1, +1, +2, +2 cars per lane; extra pedestrians = 4 + 2 × delivered. The **LaneSpawner tick was rewritten**: on WALK or flashing, each car's speed limit is capped at the stop line of the next crosswalk ahead (x = −1500, 0, 1500). **Pedestrians** wait at the curb and start crossing only on WALK, at 330 cm/s, fast enough to clear in one 12 s window. **PigeonThief** counts pickups; attempts = pickup number, 2.5–4.5 s apart, reset on game over or menu. |
 
 ## Phase 6 — Audio
 
@@ -95,10 +96,20 @@ Prompts are quoted in the language I typed them in (Mandarin), with an English g
 
 | # | Prompt (gloss) | AI → |
 |---|---|---|
-| 7.1 | 「根據以上改完，給我一個 30 秒的小 Demo 影片」 *(after these changes, make me a short 30-second demo video)* | `Tools/demo_autopilot_capture.py`. An **autopilot** reads the rat's order, finds the nearest needed food, and checks every lane's vehicles and the pedestrians before each hop. The game runs at **0.35× slow motion** while a screenshot is taken every frame. ffmpeg retimes the frames to real time, at about 22 fps → 30 fps. The audio track is rebuilt from the event log: ambience plus a squeak at each logged hop. |
+| 7.1 | 「根據以上改完，給我一個 30 秒的小 Demo 影片」 *(after these changes, make me a short 30-second demo video)* | v1: `Tools/demo_autopilot_capture.py`, an autopilot plus a screenshot every frame at 0.35× slow motion, retimed with ffmpeg. |
+| 7.2 | 「30 秒 Demo 會要經過兩個東西：第一失敗一次，然後成功，讓大家看到 Donate 畫面，但不用真的點進 Donate，回到首頁，然後退出畫面」 *(the 30-second demo should go through two runs: fail once, then succeed, so everyone sees the Donate screen; don't actually click into Donate, go back to the home screen, then show the game exiting)* | v2: a phase-scripted autopilot. **Menu** → **fail run**: the rat waits in the first lane until traffic hits it → **Game Over** → **Try again** → **win run** → **Street Clear** → **Next Block** (Donate page, button not pressed) → **Home** → **Exit**. The win run took 4 autopilot revisions. (1) It crossed beside the crosswalks into the crowds. (2) It froze behind cars stopped at the stop line. (3) An attempt to top up lives failed because `Lives` isn't instance-editable, so that idea was dropped. (4) The final bot measures each car's real velocity between frames, crosses mid-block only on WALK, and won genuinely with all 5 deliveries in about 47 game-seconds. 1,255 selected frames were converted to JPG on Windows with PowerShell/System.Drawing, then edited in Python/PIL: captions, a ×7 fast-forward, an end card. ffmpeg encoded the video. The audio was rebuilt from the event log: ambience, a squeak per hop, the lose sting at Game Over, the win sting at Street Clear. |
 
-**Trailer shot list (current 30 s cut, all real gameplay):** 0–2.5 s start screen (hook) → 2.5–9 s first crossing past a bus → 9.6 s grab food → 10–15 s carry home under the PIGEON! warning → 15.9 s delivery tick → 16–31 s second run with a JAYWALK combo → fade.
-✏️ TODO for the PG3 trailer: add image-to-video **generated shots** from the key art, plus an end title card ("Pigeon & Rat · Download on GitHub"), and list those shot prompts here.
+**Demo shot list (`Docs/PigeonRat_Demo_30s.mp4`, 30 s):**
+- 0–2 s: start screen (hook)
+- 2–7 s: Round 1, crossing and SPLAT hits
+- 7–9.5 s: Round 1 ends in **GAME OVER**
+- 9.5–21 s: Round 2. A WALK crossing, pickup, delivery, then ×7 fast-forward through the pigeon swoops, then the last delivery.
+- 21–24 s: **STREET CLEAR!** with the stats panel
+- 24–26.5 s: **Donate more · Play more** page
+- 26.5–28.5 s: back to the menu → Exit
+- 28.5–30 s: end card, "Free Windows download on GitHub" (call to action)
+
+✏️ TODO for the PG3 trailer rubric: add image-to-video **generated shots** from the key art and log their prompts here.
 
 ## Phase 8 — Ship
 
@@ -135,6 +146,9 @@ RunUAT.bat BuildCookRun -project="...\MyProject.uproject" -noP4 -platform=Win64 
 | Level script crashed half-way (`rerun_construction_scripts` doesn't exist) and the bench groups moved twice | An unavailable API, plus a non-idempotent script | Rewrote it to place benches at absolute positions, cleaning the `NYCrossing/Props` folder first, so re-runs are safe |
 | Demo autopilot: the rat jittered left and right | ←/→ are camera-relative; with the camera facing +Y, screen-right is world −X | Corrected the mapping; made the food target "sticky" |
 | Demo capture: a 10 s gap and about 9 fps | A first-frame hitch, plus editor CPU throttling in the background | Waited for the hitch to pass; turned off "Use less CPU when in background"; slow-motion capture at 0.35× |
+| Rewriting the pigeon AI: *"Could not connect pin P0 to self"* | `SetActorLocation`'s first positional pin is the target actor | Named every pin (`:self`, `:NewLocation`, `:bTeleport`) |
+| *"Unknown exec output 4 on SwitchOnInt"* | Switch cases must start at 0 and be consecutive | Added an empty `(:0)` case |
+| *"Variables\|Default\|GetState does not exist"* in the traffic tick | The spawner's `Signal` variable was untyped and empty on every lane | Looked the signal up at runtime (`GetAllActorsOfClass` → cast → `GetState`) |
 | **Packaging #1:** "Win64 SDK not found" | The `GameplayStateTree` plugin made the BP project count as a C++ project, which needs the Windows SDK | Disabled that unused plugin |
 | **Packaging #2:** the same, then *MyProjectEditor.target not found* | The editor-only **ModelContextProtocol / AllToolsets** plugins also forced a code build; stale temp `.Target.cs` files remained | The packaging script strips those plugins from the `.uproject` for the duration of the build, deletes `Intermediate/Source`, then restores the file. BUILD SUCCESSFUL in 3 min. |
 

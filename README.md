@@ -9,7 +9,7 @@ You are a New York rat. Today's menu is on the far sidewalk: pizza, a hot dog, s
 | | |
 |---|---|
 | **Download (Windows)** | [**Latest release → PigeonAndRat_Windows.zip**](https://github.com/yche1364-YJ/game-Pigeon-and-Rat-UE/releases/latest) |
-| **Gameplay demo (30 s)** | [Docs/PigeonRat_Demo_30s.mp4](Docs/PigeonRat_Demo_30s.mp4) |
+| **Gameplay demo (30 s)** | [Docs/PigeonRat_Demo_30s.mp4](Docs/PigeonRat_Demo_30s.mp4): lose a round → win a round → Street Clear → Donate page → Home → Exit |
 | **Engine** | Unreal Engine 5.8 (Blueprint-only project) |
 | **Course** | AME 294 · Portfolio Game 3 |
 | **AI tools** | Claude (coding agent via Unreal MCP) · Tripo AI (3D) · ElevenLabs (audio) |
@@ -49,8 +49,8 @@ Other documents: **[PROMPT_LOG.md](PROMPT_LOG.md)** (full AI prompt log, error r
 1. Look at the menu (top-left) and the strip map (bottom-left). Each food icon on the map shows where that food is along the street.
 2. Hop across the road. Touch a food on the far sidewalk to grab it. The hot dog is on top of the cart, so press ↑ to climb up.
 3. The camera turns around. Follow the yellow arrow back home. The 🏠 icon on the map marks the nest.
-4. Watch the sky. When **PIGEON!** flashes, a pigeon is swooping in to steal what you carry.
-5. Crossing on a red light (**JAYWALK**) is risky but builds a combo for bonus points.
+4. Watch the sky. When **PIGEON!** flashes, a pigeon is swooping in to steal what you carry. It attacks once while you carry your 1st food, twice for the 2nd, and so on.
+5. **Read the signal.** On **WALK** every car stops at the crosswalks, but crowds of pedestrians flood across, so don't get stepped on. On **DONT WALK** the traffic moves again, and crossing then is a **JAYWALK**: risky, but it builds a combo for bonus points.
 
 ---
 
@@ -59,13 +59,14 @@ Other documents: **[PROMPT_LOG.md](PROMPT_LOG.md)** (full AI prompt log, error r
 | Pillar | What it is in the game |
 |---|---|
 | **Reward** | **Food:** +100 per delivery, +150 for pizza or cheesecake. **Forward progress:** +10 for each new row. **Jaywalk combo:** crossing on red pays +20 × combo. **Lives bonus:** +100 per heart left on a win. The best score is saved to disk (NEW BEST). The menu card ticks each delivered food ✔. |
-| **Damage** | **Taxis, buses and bikes:** −1 heart. **Pedestrians** can step on you: −1 heart. **The pigeon thief** steals the food you carry, so you must go back for it. **The city gets busier:** after every crossing there are more cars, more pedestrians and faster traffic. The first crossing is deliberately slow and gentle. |
+| **Damage** | **Taxis, buses and bikes:** −1 heart. They only move on DONT WALK. **Pedestrian crowds** cross on WALK and can step on you: −1 heart. **The pigeon thief** steals the food you carry, so you must go back for it. It escalates: 1 attack for the 1st pickup, 2 for the 2nd, and so on. **Gradual difficulty:** every food you deliver adds more cars, faster traffic and bigger crowds. The first food is the gentlest. |
 | **End** | **Win:** deliver all 5 foods → **STREET CLEAR!** screen, then the *Next Block* / Donate comic page. DONATE opens [chenyingju.com/contact-form](https://chenyingju.com/contact-form). **Lose:** 0 hearts → **GAME OVER** screen with stats. Both screens have *Try again / Menu*, so you never need to restart the game. |
 
 **More systems:**
 - Food respawns 3–6 s after you take it.
+- A traffic signal cycles every 20 s: 7 s WALK, 5 s flashing, 8 s DONT WALK. Cars stop at all three crosswalks while the crowds cross. Some New Yorkers also jaywalk mid-block, so no column of the street is completely safe.
 - Food sits in different places: on the ground, on cardboard boxes, on green trash cans, on benches, and on top of the hot dog cart.
-- There are three crosswalks. A traffic signal drives the jaywalk logic, and cars yield to pedestrians.
+- There are three crosswalks, and cars always yield to pedestrians in their lane.
 - The camera flips 180° when you carry food, and the controls flip with it.
 - Pause and How-to-Play overlays.
 
@@ -75,13 +76,13 @@ Other documents: **[PROMPT_LOG.md](PROMPT_LOG.md)** (full AI prompt log, error r
 
 All UI art was designed together with Claude first as web mock-ups (comic-book halftone style), then rendered to textures and drawn by a Blueprint HUD. The HUD is laid out in 1280×720 design space and letter-boxed to any resolution.
 
-| Start | Game Over |
+| Start | Game Over (lose) |
 |---|---|
-| ![Start](Docs/media/screen_start.jpg) | ![Game over](Docs/media/screen_gameover.jpg) |
+| ![Start](Docs/media/screen_start.jpg) | ![Game over](Docs/media/ingame_gameover.jpg) |
 | **Street Clear (win)** | **Donate more · Play more** |
-| ![Clear](Docs/media/screen_clear.jpg) | ![Donate](Docs/media/screen_donate.jpg) |
+| ![Clear](Docs/media/ingame_streetclear.jpg) | ![Donate](Docs/media/screen_donate.jpg) |
 
-The dark panels on the Game Over and Street Clear screens are filled at runtime with score, best combo, food points and lives.
+These are real in-game captures. At runtime the Game Over and Street Clear panels show your score, the menu you finished, food points, combo points and the lives bonus. DONATE opens [chenyingju.com/contact-form](https://chenyingju.com/contact-form), and HOME returns to the menu.
 
 **HUD and How to Play**
 
@@ -106,6 +107,8 @@ The dark panels on the Game Over and Street Clear screens are filled at runtime 
 | A bus fills the lane, so wait for the gap. | The far sidewalk: hot dog cart, trash cans, boxes and food. |
 | ![](Docs/media/gp_pigeon_warning.jpg) | ![](Docs/media/gp_jaywalk_combo.jpg) |
 | Carrying food home. The arrow points to the nest and the PIGEON! warning flashes. | A JAYWALK combo pays +40. |
+| ![](Docs/media/gp_pigeon_swoop.jpg) | ![](Docs/media/ingame_gameover.jpg) |
+| The pigeon swoops in while the rat carries food home. | Out of lives: the Game Over screen with Try Again / Menu. |
 
 Level overview: three crosswalks, the hot dog stand and scattered props.
 
@@ -126,7 +129,7 @@ This game was built in one long conversation between me (the designer) and **Cla
 | **4. 3D assets** | Generate the rat, pigeon and 4 foods in **Tripo**. I asked which format (FBX), which variant and which texture size. Cheese became **cheesecake**. | Advised on formats; processed the FBX files in Blender (decimate, scale, pivot, colour grade); built one toon master material |
 | **5. Into Unreal** | "Build everything we designed in Unreal." | Wrote all the Blueprints through MCP: rat player, pigeon thief AI, food benches, HUD, save game, menus, pause |
 | **6. Playtest fixes** | "After crossing I can't turn back without getting hit." The hot dog sign should be a real hot dog on a pole, and I want to climb the cart. | Camera flips 180° when carrying, with relative controls; hot dog sign; cart climbing |
-| **7. Difficulty** | "Too hard. Add traffic only after each crossing." Later: "the first crossing should be easier" and "3 lives". | Traffic factor per crossing, +cars, +pedestrians, a 0.5× first crossing; confirmed 3 lives |
+| **7. Difficulty** | "Too hard. Add traffic after each crossing." Then "3 lives, and the first crossing easier". Finally: "Per-crossing ramps make it hard to clear. Ramp per **food collected** instead. Cars should stop on WALK with crowds crossing. The pigeon should come once after the 1st food, twice after the 2nd…" | Difficulty tied to deliveries (traffic ×0.5 → ×0.98, +0 to +2 cars per lane, crowds of 4 to 12 extra people); cars stop at every crosswalk on WALK; pigeon attack count = pickup number |
 | **8. Liveliness** | "Food is placed too regularly, and so are the benches. Put food on boxes, the ground and trash cans. Add crosswalks on the left and right." | Wrote a level-layout script: 9 scattered pickups, crates and trash cans, 2 extra crosswalks, irregular benches |
 | **9. Audio** | Use my ElevenLabs music and SFX, plus a squeak on every hop | Imported, looped the ambience, wired the SFX into the Blueprints |
 | **10. Ship** | 30 s demo video, packaged build, GitHub, README, presentation | Autopilot capture script, UAT packaging, docs |
