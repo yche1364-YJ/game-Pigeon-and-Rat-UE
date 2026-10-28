@@ -4,11 +4,14 @@
 
 You are a New York rat. Today's menu is on the far sidewalk: pizza, a hot dog, soda and strawberry cheesecake. Hop across eight lanes of taxis, buses and bikes, grab the food, and carry it back to your nest — while a pigeon dive-bombs you to steal it.
 
+### 🎮 [Play it on itch.io → yjcgame.itch.io/pigeon-and-rat](https://yjcgame.itch.io/pigeon-and-rat)
+
 ![Gameplay](Docs/media/gameplay.gif)
 
 | | |
 |---|---|
-| **Download (Windows)** | [**Latest release → PigeonAndRat_Windows.zip**](https://github.com/yche1364-YJ/game-Pigeon-and-Rat-UE/releases/latest) |
+| **Play / download on itch.io** | [**yjcgame.itch.io/pigeon-and-rat**](https://yjcgame.itch.io/pigeon-and-rat) |
+| **Download from GitHub (Windows)** | [Latest release → PigeonAndRat_Windows.zip](https://github.com/yche1364-YJ/game-Pigeon-and-Rat-UE/releases/latest) |
 | **Gameplay demo (30 s)** | [Docs/PigeonRat_Demo_30s.mp4](Docs/PigeonRat_Demo_30s.mp4): lose a round → win a round → Street Clear → Donate page → Home → Exit |
 | **Engine** | Unreal Engine 5.8 (Blueprint-only project) |
 | **Course** | AME 294 · Portfolio Game 3 |
@@ -33,7 +36,7 @@ Other documents: **[PROMPT_LOG.md](PROMPT_LOG.md)** (full AI prompt log, error r
 
 ## 1. How to play
 
-**Install:** download `PigeonAndRat_Windows.zip` from [Releases](https://github.com/yche1364-YJ/game-Pigeon-and-Rat-UE/releases/latest), unzip the whole folder, and double-click **`PigeonAndRat.exe`**. If Windows SmartScreen warns, choose *More info → Run anyway*. You need Windows 10/11 (64-bit) and a DirectX 12 GPU.
+**Install:** download `PigeonAndRat_Windows.zip` from [itch.io](https://yjcgame.itch.io/pigeon-and-rat) or [GitHub Releases](https://github.com/yche1364-YJ/game-Pigeon-and-Rat-UE/releases/latest), unzip the whole folder, and double-click **`PigeonAndRat.exe`**. If Windows SmartScreen warns, choose *More info → Run anyway*. You need Windows 10/11 (64-bit) and a DirectX 12 GPU.
 
 | Key | Action |
 |---|---|
