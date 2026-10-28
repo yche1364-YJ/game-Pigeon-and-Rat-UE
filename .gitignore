@@ -1,0 +1,34 @@
+# Unreal Engine generated folders
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+Build_Package/
+.vs/
+.vscode/
+.idea/
+
+# Unreal temp / per-user files
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+*.code-workspace
+
+# Packaged builds go to GitHub Releases, not the repo
+*.zip
+*.pak
+*.ucas
+*.utoc
+
+# Scratch folder used while building the level with AI tools
+Content/NYCrossing/_dump/
+
+# OS
+.DS_Store
+Thumbs.db
